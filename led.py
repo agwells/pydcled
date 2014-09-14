@@ -9,6 +9,7 @@ import random
 # Python program to control the Dream Cheeky USB LED
 # Code inspired by dcled: http://www.last-outpost.com/~malakai/dcled/
 # and by dcled_ruby: https://github.com/Lewis-Clayton/dcled_ruby
+# Requires The PyUSB library
 
 # find our device
 device = usb.core.find(
