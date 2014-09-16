@@ -31,39 +31,39 @@ diamond = [
 
 
 eyes1 = \
-"....xxx.......xxx...." \
-"...x...x.....x...x..." \
-"..x.....x...x.....x.." \
-"..x..x..x...x..x..x.." \
-"..x.....x...x.....x.." \
-"...x...x.....x...x..." \
-"....xxx...x...xxx...." 
+"..xxx...........xxx.." \
+".x...x.........x...x." \
+"x.....x.......x.....x" \
+"x..x..x.......x..x..x" \
+"x.....x.......x.....x" \
+".x...x...xxx...x...x." \
+"..xxx.....x.....xxx.." 
 
 eyes2 = \
 "....................." \
-"...xxxxx.....xxxxx..." \
-"..x.....x...x.....x.." \
-"..x..x..x...x..x..x.." \
-"..x.....x...x.....x.." \
-"...xxxxx.....xxxxx..." \
+".xxxxx.........xxxxx." \
+"x.....x.......x.....x" \
+"x..x..x.......x..x..x" \
+"x.....x.......x.....x" \
+".xxxxx...xxx...xxxxx." \
 "..........x.........." 
 
 eyes3 = \
 "....................." \
 "....................." \
-"...xxxxx.....xxxxx..." \
-"..x..x..x...x..x..x.." \
-"...xxxxx.....xxxxx..." \
-"....................." \
+".xxxxx.........xxxxx." \
+"x..x..x.......x..x..x" \
+".xxxxx.........xxxxx." \
+".........xxx........." \
 "..........x.........." 
 
 eyes4 = \
 "....................." \
 "....................." \
 "....................." \
-"..xxxxxxx...xxxxxxx.." \
+"xxxxxxx.......xxxxxxx" \
 "....................." \
-"....................." \
+".........xxx........." \
 "..........x.........." 
 
 
@@ -162,10 +162,15 @@ def sendpackets(data):
         )
 
 while (1):
-    for i in range (0, random.randint(5,25)):
+
+    # Eyes open for random duration
+    for i in range (0, random.randint(0,16)):
+        # Even though the image isn't changing, we need to refresh the LED
+        # about every 0.4 seconds
         sendpackets(parse(eyes1))
         time.sleep(0.4)
 
+    # Blink animation
     for data in eyesblink:
         sendpackets(parse(data))
         time.sleep(0.05)
