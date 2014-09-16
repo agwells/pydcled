@@ -1,7 +1,4 @@
 import usb.core
-import usb.util
-import sys
-import os
 import time
 import random
 
@@ -10,16 +7,6 @@ import random
 # and by dcled_ruby: https://github.com/Lewis-Clayton/dcled_ruby
 
 # Requires PyUSB 1.0: http://walac.github.io/pyusb/
-
-# find our device
-device = usb.core.find(
-#    backend = usb.backend.libusb0.get_backend(),
-    idVendor = 0x1d34,
-    idProduct = 0x0013
-)
-#print device.get_active_configuration()
-#device.reset()
-#device.detach_kernel_driver(0)
 
 # Sample data from the hardware developer's manual: makes a diamond
 diamond = [
@@ -160,6 +147,37 @@ def sendpackets(data):
             wIndex = 0x0000,
             data_or_wLength = packet
         )
+
+# find our device
+device = usb.core.find(
+#    backend = usb.backend.libusb0.get_backend(),
+    idVendor = 0x1d34,
+    idProduct = 0x0013
+)
+
+detachkerneldriver = True
+
+# Check whether we need to detach the kernel driver
+try:
+    if device.is_kernel_driver_active(0) == False:
+        detachkerneldriver = False
+# In some supported pyusb backend libraries, this method isn't implemented
+# In which case, we may as well just try to detach the kernel driver.
+except NotImplementedError:
+    detachkerneldriver = True
+
+if detachkerneldriver == True:
+    try:
+        device.detach_kernel_driver(0)
+    # If we're trying to detach the kernel driver with no information (because
+    # the checking method wasn't implemented), it'll throw this error
+    except usb.core.USBError:
+        pass
+
+# try:
+#     device.detach_kernel_driver(0)
+# except usb.core.USBError:
+#     pass
 
 while (1):
 
