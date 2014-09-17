@@ -179,25 +179,28 @@ if detachkerneldriver == True:
 # except usb.core.USBError:
 #     pass
 
-def blink():
+def blink(blinktime = 0.05):
     for frame in eyesblink:
         sendpackets(parse(frame))
-        time.sleep(0.05)
+        time.sleep(blinktime)
+        
 
-# Wake up by blinking a few times
-for i in range(0, random.randint(2,5)):
-    blink()
+blinktime = 0.1
+
+# Blink a few times before closing your eyes
+for i in range(0, random.randint(2,4)):
+    blink(blinktime)
+
+# Close your eyes
+for frame in [eyes2, eyes3, eyes4]:
+    sendpackets(parse(frame))
+    time.sleep(blinktime)
 
 # Awake
 while (1):
 
-    # Eyes open for random duration
-    for i in range (0, random.randint(0,16)):
-        # Even though the image isn't changing, we need to refresh the LED
-        # about every 0.4 seconds
-        sendpackets(parse(eyes1))
-        time.sleep(0.4)
-
-    # Blink animation
-    blink()
+    # Even though the image isn't changing, we need to refresh the LED
+    # about every 0.4 seconds
+    sendpackets(parse(eyes4))
+    time.sleep(0.4)
 

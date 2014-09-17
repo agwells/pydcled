@@ -184,6 +184,11 @@ def blink():
         sendpackets(parse(frame))
         time.sleep(0.05)
 
+# Open your eyes
+for frame in [eyes4, eyes3, eyes2]:
+    sendpackets(parse(frame))
+    time.sleep(0.05)
+
 # Wake up by blinking a few times
 for i in range(0, random.randint(2,5)):
     blink()
