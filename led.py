@@ -2,7 +2,7 @@ import usb.core
 import time
 import random
 
-# Python program to control the Dream Cheeky USB LED
+# Python program to control the Dream Cheeky USB LED: http://www.dreamcheeky.com/led-message-board
 # Code inspired by dcled: http://www.last-outpost.com/~malakai/dcled/
 # and by dcled_ruby: https://github.com/Lewis-Clayton/dcled_ruby
 
