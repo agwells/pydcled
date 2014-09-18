@@ -17,6 +17,54 @@ diamond = [
     [0x00, 0x06, 0xFF,0xFE,0xFF,],
 ]
 
+teeth = [
+"""
+xxxxxxxxxxxxxxxxxxxxx
+.xxx.xxx.xxx.xxx.xxx.
+.xxx.xxx.xxx.xxx.xxx.
+..x.x.x.x.x.x.x.x.x..
+..x.x.x.x.x.x.x.x.x..
+...xxx.xxx.xxx.xxx...
+...xxx.xxx.xxx.xxx...
+""",
+"""
+.xxx.xxx.xxx.xxx.xxx.
+.xxx.xxx.xxx.xxx.xxx.
+..x...x...x...x...x..
+..x.x.x.x.x.x.x.x.x..
+....x...x...x...x....
+...xxx.xxx.xxx.xxx...
+...xxx.xxx.xxx.xxx...
+""",
+"""
+.xxx.xxx.xxx.xxx.xxx.
+..x...x...x...x...x..
+..x...x...x...x...x..
+.....................
+....x...x...x...x....
+....x...x...x...x....
+...xxx.xxx.xxx.xxx...
+""",
+"""
+..x...x...x...x...x..
+..x...x...x...x...x..
+.....................
+.....................
+.....................
+....x...x...x...x....
+....x...x...x...x....
+""",
+"""
+..x...x...x...x...x..
+.....................
+.....................
+.....................
+.....................
+.....................
+....x...x...x...x....
+""",
+]
+
 kitty = []
 kitty.append(
 "..xxx...........xxx.." \
@@ -239,8 +287,9 @@ def blink(eyeset, blinktime = 0.05):
 # The available eye sets
 eyesets = {
     'grumpy' : grumpy,
-    'kitty' : kitty,
-    'single' : single
+    'kitty'  : kitty,
+    'single' : single,
+    'teeth'  : teeth
 }
 
 # Get the command-line options to decide which set of eyes to display, and open or shut
