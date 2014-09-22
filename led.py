@@ -148,6 +148,48 @@ grumpy.append(
 )
 
 
+human = []
+human.append(
+"....................." \
+".xxxxx.........xxxxx." \
+"x.xxx.x.......x.xxx.x" \
+"x.xxx.xx.xxx.xx.xxx.x" \
+"x.....x..xxx..x.....x" \
+".x...x...xxx...x...x." \
+"..xxx...x.x.x...xxx.." 
+)
+
+human.append(
+"....................." \
+"....................." \
+"xxxxxxx.......xxxxxxx" \
+"x.xxx.xx.xxx.xx.xxx.x" \
+"x.....x..xxx..x.....x" \
+".xxxxx...xxx...xxxxx." \
+"........x.x.x........" 
+)
+
+human.append(
+"....................." \
+"....................." \
+"....................." \
+"xxxxxxxx.xxx.xxxxxxxx" \
+"xxxxxxx..xxx..xxxxxxx" \
+".........xxx........." \
+"........x.x.x........" 
+)
+
+human.append(
+"....................." \
+"....................." \
+"....................." \
+"xxxxxxxx.xxx.xxxxxxxx" \
+".........xxx........." \
+".........xxx........." \
+"........x.x.x........" 
+)
+
+
 single = []
 single.append(
 ".........xxx........." \
@@ -289,7 +331,8 @@ eyesets = {
     'grumpy' : grumpy,
     'kitty'  : kitty,
     'single' : single,
-    'teeth'  : teeth
+    'teeth'  : teeth,
+    'human'  : human
 }
 
 # Get the command-line options to decide which set of eyes to display, and open or shut
