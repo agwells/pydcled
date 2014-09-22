@@ -1,6 +1,6 @@
 #/bin/sh
 
-eyes=kitty
+eyes=${1:-kitty}
 
 dbus-monitor --session "interface=org.mate.ScreenSaver,member=ActiveChanged" --monitor | (
 
