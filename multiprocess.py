@@ -367,7 +367,6 @@ def f(name):
 
 pipetome, pipetochild = multiprocessing.Pipe()
 
-
 p = Process(target=f, args=('bob',))
 p.start()
 p.join()
