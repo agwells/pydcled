@@ -1,9 +1,8 @@
-import usb.core
 import time
 import random
 import argparse
-
-from multiprocessing import Process
+import dcled.core
+import curses
 
 # Python program to control the Dream Cheeky USB LED: http://www.dreamcheeky.com/led-message-board
 # Code inspired by dcled: http://www.last-outpost.com/~malakai/dcled/
@@ -233,97 +232,9 @@ single.append(
 "....................." 
 )
 
-def parse(screen):
-    # strip out all newlines, in case they were using those to format the string
-    screen = screen.replace("\n", '').lower()
-    rows = []
-    for i in range(7):
-        rowbytes = []
-        # Grab a slice of 21 characters, and pad it out to 24 by adding three 'x's to the end
-        row = screen[(0+i*21):(21+i*21)] + '...'
-        # Now grap slices of that, 8 characters at a time, and convert them to bytes
-        bytenum = 0
-        byteval = 0
-#        print "row: " + row
-        for j in range(24):
-            bitnum = j % 8
-            if (row[j] != 'x'):
-                bitval = 2 ** bitnum
-            else:
-                bitval = 0
-            byteval += bitval
-#            print "char {0} = {1}; bitval = {2}; byteval = {3} ({3:X})".format((j), row[j], bitval, byteval)
-            
-            if bitnum == 7:
-                bytenum += 1
-                rowbytes.insert(0, byteval)
-                byteval = 0
-        rows.append(rowbytes)
-    
-    #Add an empty "row 8" to round off the size of the fourth packet
-    rows.append([0xFF] * 3)
-
-    packets = []
-    for i in range(0,7,2):
-        packet = []
-        # brightness (0, 1, or 2; 0 = brightest)
-        packet.append(0)
-        # row number
-        packet.append(i)
-        for j in range(2):
-            for k in range(3):
-                packet.append(rows[i+j][k])
-        packets.append(packet)
-    return packets
-#        print "\n"
-
-# Data should be an array of packets ready to send to the device
-def sendtoled(screen):
-    global device
-    
-    data = parse(screen)
-    for packet in data:
-        device.ctrl_transfer(
-            bmRequestType = 0x21,
-            bRequest = 0x09,
-            wValue = 0x0000,
-            wIndex = 0x0000,
-            data_or_wLength = packet
-        )
-
-def usbinit():
-    global device
-    
-    # find our device
-    device = usb.core.find(
-    #    backend = usb.backend.libusb0.get_backend(),
-        idVendor = 0x1d34,
-        idProduct = 0x0013
-    )
-
-    detachkerneldriver = True
-
-    # Check whether we need to detach the kernel driver
-    try:
-        if device.is_kernel_driver_active(0) == False:
-            detachkerneldriver = False
-    # In some supported pyusb backend libraries, this method isn't implemented
-    # In which case, we may as well just try to detach the kernel driver.
-    except NotImplementedError:
-        detachkerneldriver = True
-
-    if detachkerneldriver == True:
-        try:
-            device.detach_kernel_driver(0)
-        # If we're trying to detach the kernel driver with no information (because
-        # the checking method wasn't implemented), it'll throw this error
-        except usb.core.USBError:
-            pass
-
-
-def blink(eyeset, blinktime = 0.05):
+def blink(led, eyeset, blinktime = 0.05):
     for frame in eyeset + eyeset[::-1]:
-        sendtoled(frame)
+        led.showascii(frame)
         time.sleep(blinktime)
 
 ######################################
@@ -350,68 +261,58 @@ parser.add_argument(
     action = 'store_true',
     help = 'Add this to display with eyes shut'
 )
-
+parser.add_argument(
+    '-i', '--interactive',
+    action = 'store_true',
+    help = 'Interactively display the LED content in the shell'
+)
 args = parser.parse_args()
 eyes = eyesets[args.eyes]
 
-usbinit()
+# Main control loop; placed in a function call so we can use it with curses
+def mainui(cursesscr = False):
+    led = dcled.core.LED(cursesscr)
+    
+    if (args.shut):
+        blinktime = 0.1
+    
+        # Blink a few times before closing your eyes
+        for i in range(0, random.randint(2,4)):
+            blink(led, eyes, blinktime)
+    
+        # Close your eyes (skip the first frame because we showed it during the blink
+        for frame in eyes[1:]:
+            led.showascii(frame)
+            time.sleep(blinktime)
+    
+        # Asleep
+        led.showascii(eyes[-1])
 
-# See https://docs.python.org/2/library/multiprocessing.html
+    else:
+        blinktime = 0.05
+        
+        # Open your eyes
+        for frame in eyes[::-1]:
+            led.showascii(frame)
+            time.sleep(blinktime)
+    
+        # Wake up by blinking a few times
+        for i in range(0, random.randint(2,5)):
+            blink(led, eyes, blinktime)
+    
+        # Awake
+        while (1):
+    
+            # Eyes open for random duration
+            led.showascii(eyes[0])
+            time.sleep(random.randint(0,6))
+    
+            # Blink animation
+            blink(led, eyes, blinktime)
+    
 
-from multiprocessing import Process
-def f(name):
-    print 'hello', name
-
-# Only needed on Windows :-P
-# if __name__ == '__main__':
-
-pipetome, pipetochild = multiprocessing.Pipe()
-
-p = Process(target=f, args=('bob',))
-p.start()
-p.join()
-
-# if (args.shut):
-#     blinktime = 0.1
-# 
-#     # Blink a few times before closing your eyes
-#     for i in range(0, random.randint(2,4)):
-#         blink(eyes, blinktime)
-# 
-#     # Close your eyes (skip the first frame because we showed it during the blink
-#     for frame in eyes[1:]:
-#         sendtoled(frame)
-#         time.sleep(blinktime)
-# 
-#     # Awake
-#     while (1):
-# 
-#         # Even though the image isn't changing, we need to refresh the LED
-#         # about every 0.4 seconds
-#         sendtoled(eyes[-1])
-#         time.sleep(0.4)
-# else:
-#     blinktime = 0.05
-#     
-#     # Open your eyes
-#     for frame in eyes[::-1]:
-#         sendtoled(frame)
-#         time.sleep(blinktime)
-# 
-#     # Wake up by blinking a few times
-#     for i in range(0, random.randint(2,5)):
-#         blink(eyes, blinktime)
-# 
-#     # Awake
-#     while (1):
-# 
-#         # Eyes open for random duration
-#         for i in range (0, random.randint(0,16)):
-#             # Even though the image isn't changing, we need to refresh the LED
-#             # about every 0.4 seconds
-#             sendtoled(eyes[0])
-#             time.sleep(0.4)
-# 
-#         # Blink animation
-#         blink(eyes, blinktime)
-
+# If they want it interactive, use curses.wrapper to reset the shell when the program exits
+if args.interactive:
+    curses.wrapper(mainui)
+else:
+    mainui()

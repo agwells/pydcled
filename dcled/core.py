@@ -1,13 +1,23 @@
 import usb.core
 import curses
 import re
+import multiprocessing
+import time
 
-class LED(object):
+class LED_untimed(object):
     
     DeviceVendor = 0x1d34
     DeviceProduct = 0x0013
     ledheight = 7
     ledwidth = 21
+    
+    demodiamond = [
+    [0x00, 0x00, 0xFF,0xFE,0xFF, 0xFF,0xFD,0x7F,],
+    [0x00, 0x02, 0xFF,0xFB,0xBF, 0xFF,0xF7,0xDF,],
+    [0x00, 0x04, 0xFF,0xFB,0xBF, 0xFF,0xFD,0x7F,],
+    [0x00, 0x06, 0xFF,0xFE,0xFF,],
+]
+
     
     def _acquiredevice(self):
         # find our device
@@ -128,6 +138,34 @@ class LED(object):
 #            self.stdscr.addstr(0, 0, self.currentimage, curses.color_pair(1))
             self.stdscr.refresh()
 
-
     def showascii(self, screen, litchar='x'):
         self.sendtoled(self.packascii(screen, litchar))
+
+
+class LED(object):
+    # How long to wait (in seconds) between refreshing the USB
+    refreshrate = 0.4
+    
+    def foo(self):
+        print 'bar'
+    
+    def __init__(self, cursesscr = False):
+        self.pipesend, piperecv = multiprocessing.Pipe()
+        self.process = multiprocessing.Process(target=LED._run, args=(self, piperecv, cursesscr))
+        self.process.start()
+        
+    def close(self):
+        self.process.terminate()
+    
+    def showascii(self, screen):
+        self.pipesend.send(screen)
+    
+    def _run(self, piperecv, cursesscr):
+        led = LED_untimed(cursesscr)
+        # Initialize screen to empty
+        showonscr = '.' * (LED_untimed.ledheight * LED_untimed.ledwidth)
+        while True:
+            led.showascii(showonscr)
+            ready = piperecv.poll(self.refreshrate)
+            if (ready):
+                showonscr = piperecv.recv()
