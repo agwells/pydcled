@@ -2,7 +2,7 @@ import usb.core
 import curses
 import re
 import multiprocessing
-import time
+import atexit
 
 class LED_untimed(object):
     
@@ -146,14 +146,6 @@ class LED(object):
     # How long to wait (in seconds) between refreshing the USB
     refreshrate = 0.4
     
-    def foo(self):
-        print 'bar'
-    
-    def __init__(self, cursesscr = False):
-        self.pipesend, piperecv = multiprocessing.Pipe()
-        self.process = multiprocessing.Process(target=LED._run, args=(self, piperecv, cursesscr))
-        self.process.start()
-        
     def close(self):
         self.process.terminate()
     
@@ -161,11 +153,21 @@ class LED(object):
         self.pipesend.send(screen)
     
     def _run(self, piperecv, cursesscr):
-        led = LED_untimed(cursesscr)
-        # Initialize screen to empty
-        showonscr = '.' * (LED_untimed.ledheight * LED_untimed.ledwidth)
-        while True:
-            led.showascii(showonscr)
-            ready = piperecv.poll(self.refreshrate)
-            if (ready):
-                showonscr = piperecv.recv()
+        try:
+            led = LED_untimed(cursesscr)
+            # Initialize screen to empty
+            showonscr = '.' * (LED_untimed.ledheight * LED_untimed.ledwidth)
+            while True:
+                led.showascii(showonscr)
+                ready = piperecv.poll(self.refreshrate)
+                if (ready):
+                    showonscr = piperecv.recv()
+        except (KeyboardInterrupt, SystemExit):
+            quit()
+    
+    def __init__(self, cursesscr = False):
+        self.pipesend, piperecv = multiprocessing.Pipe()
+        self.process = multiprocessing.Process(target=LED._run, args=(self, piperecv, cursesscr))
+        self.process.daemon = True
+        self.process.start()
+        atexit.register(self.close)
