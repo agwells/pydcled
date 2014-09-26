@@ -1,6 +1,5 @@
 import usb.core
 import curses
-import curses.wrapper
 import re
 
 class LED(object):
@@ -45,10 +44,18 @@ class LED(object):
         self.running = False
         self._acquiredevice()
         self.currentimage = ''.ljust(self.ledheight * self.ledwidth, ' ')
-        self.usecurses = True
         if cursesscreen:
-            self.usecursess = True
+            self.usecurses = True
             self.stdscr = cursesscreen
+            curses.use_default_colors()
+            # Code for changing the color
+#             if (curses.can_change_color()):
+#                 curses.init_color(0, 0, 0, 0)
+#                 curses.init_pair(1, curses.COLOR_RED, 0)
+#             else:
+#                 curses.init_pair(1, curses.COLOR_RED, curses.COLOR_BLACK)
+        else:
+            self.usecurses = False
 
     # Takes an ascii representation of the screen, and converts it into a set of bytes
     # suitable to send via USB
@@ -116,7 +123,9 @@ class LED(object):
                 data_or_wLength = packet
             )
         if (self.usecurses):
-            self.stdscr.addstr(0,0,self.currentimage)
+            self.stdscr.addstr(0, 0, self.currentimage, curses.A_BOLD)
+            # Code for showing it in color
+#            self.stdscr.addstr(0, 0, self.currentimage, curses.color_pair(1))
             self.stdscr.refresh()
 
 
