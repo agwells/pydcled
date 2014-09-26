@@ -58,7 +58,7 @@ class LED(object):
 #        print screen
         widthmult = 3
         offpixel = ' ' * widthmult
-        onpixel = ' * '
+        onpixel = ' @ '
         currentimage = screen[:(self.ledheight * self.ledwidth)].ljust((self.ledheight * self.ledwidth), ' ')
         currentimage = re.sub('[^'+litchar+']', offpixel, currentimage)
         currentimage = currentimage.replace(litchar, onpixel)
