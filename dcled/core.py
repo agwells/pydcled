@@ -1,9 +1,14 @@
 import usb.core
+import curses
+import curses.wrapper
+import re
 
 class LED(object):
     
     DeviceVendor = 0x1d34
     DeviceProduct = 0x0013
+    ledheight = 7
+    ledwidth = 21
     
     def _acquiredevice(self):
         # find our device
@@ -34,23 +39,39 @@ class LED(object):
         
         self.running = True
 
-    def __init__(self):
+    def __init__(self, cursesscreen = False):
         self.device = False
         self.brightness = 0
         self.running = False
         self._acquiredevice()
-
+        self.currentimage = ''.ljust(self.ledheight * self.ledwidth, ' ')
+        self.usecurses = True
+        self.stdscr = curses.initscr()
+#         if cursesscreen:
+#             self.usecursess = True
+#             self.stdscr = cursesscreen
    
     # Takes an ascii representation of the screen, and converts it into a set of bytes
     # suitable to send via USB
     def packascii(self, screen, litchar='x'):
         # strip out all newlines, in case they were using those to format the string
         screen = screen.replace("\n", '').lower()
+#        print screen
+        widthmult = 3
+        offpixel = ' '
+        onpixel = '*'
+        currentimage = screen[:(self.ledheight * self.ledwidth)].ljust((self.ledheight * self.ledwidth), ' ')
+        currentimage = re.sub('[^'+litchar+']', offpixel * widthmult, currentimage)
+        currentimage = currentimage.replace(litchar, onpixel * widthmult)
+        # re-insert newlines after every 21 characters
+        currentimage = '\n'.join(currentimage[i:i + self.ledwidth * widthmult] for i in xrange(0, self.ledheight * self.ledwidth * widthmult, self.ledwidth * widthmult))
+        self.currentimage = currentimage
+        
         rows = []
-        for i in range(7):
+        for i in range(self.ledheight):
             rowbytes = []
             # Grab a slice of 21 characters, and pad it out to 24 by adding three 'x's to the end
-            row = screen[(0+i*21):(21+i*21)] + '...'
+            row = screen[(0+i*self.ledwidth):(self.ledwidth + i * self.ledwidth)] + '...'
             # Now grap slices of that, 8 characters at a time, and convert them to bytes
             bytenum = 0
             byteval = 0
@@ -72,7 +93,7 @@ class LED(object):
         rows.append([0xFF] * 3)
     
         packets = []
-        for i in range(0,7,2):
+        for i in range(0, self.ledheight, 2):
             packet = []
             # brightness (0, 1, or 2; 0 = brightest)
             packet.append(self.brightness)
@@ -95,6 +116,9 @@ class LED(object):
                 wIndex = 0x0000,
                 data_or_wLength = packet
             )
+        if (self.usecurses):
+            self.stdscr.addstr(0,0,self.currentimage)
+            self.stdscr.refresh()
 
 
     def showascii(self, screen, litchar='x'):
