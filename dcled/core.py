@@ -46,11 +46,10 @@ class LED(object):
         self._acquiredevice()
         self.currentimage = ''.ljust(self.ledheight * self.ledwidth, ' ')
         self.usecurses = True
-        self.stdscr = curses.initscr()
-#         if cursesscreen:
-#             self.usecursess = True
-#             self.stdscr = cursesscreen
-   
+        if cursesscreen:
+            self.usecursess = True
+            self.stdscr = cursesscreen
+
     # Takes an ascii representation of the screen, and converts it into a set of bytes
     # suitable to send via USB
     def packascii(self, screen, litchar='x'):
@@ -58,11 +57,11 @@ class LED(object):
         screen = screen.replace("\n", '').lower()
 #        print screen
         widthmult = 3
-        offpixel = ' '
-        onpixel = '*'
+        offpixel = ' ' * widthmult
+        onpixel = ' * '
         currentimage = screen[:(self.ledheight * self.ledwidth)].ljust((self.ledheight * self.ledwidth), ' ')
-        currentimage = re.sub('[^'+litchar+']', offpixel * widthmult, currentimage)
-        currentimage = currentimage.replace(litchar, onpixel * widthmult)
+        currentimage = re.sub('[^'+litchar+']', offpixel, currentimage)
+        currentimage = currentimage.replace(litchar, onpixel)
         # re-insert newlines after every 21 characters
         currentimage = '\n'.join(currentimage[i:i + self.ledwidth * widthmult] for i in xrange(0, self.ledheight * self.ledwidth * widthmult, self.ledwidth * widthmult))
         self.currentimage = currentimage

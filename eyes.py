@@ -2,6 +2,7 @@ import time
 import random
 import argparse
 import dcled.core
+import curses
 
 # Python program to control the Dream Cheeky USB LED: http://www.dreamcheeky.com/led-message-board
 # Code inspired by dcled: http://www.last-outpost.com/~malakai/dcled/
@@ -260,53 +261,65 @@ parser.add_argument(
     action = 'store_true',
     help = 'Add this to display with eyes shut'
 )
-
+parser.add_argument(
+    '-i', '--interactive',
+    action = 'store_true',
+    help = 'Interactively display the LED content in the shell'
+)
 args = parser.parse_args()
 eyes = eyesets[args.eyes]
 
-led = dcled.core.LED()
-
-if (args.shut):
-    blinktime = 0.1
-
-    # Blink a few times before closing your eyes
-    for i in range(0, random.randint(2,4)):
-        blink(led, eyes, blinktime)
-
-    # Close your eyes (skip the first frame because we showed it during the blink
-    for frame in eyes[1:]:
-        led.showascii(frame)
-        time.sleep(blinktime)
-
-    # Awake
-    while (1):
-
-        # Even though the image isn't changing, we need to refresh the LED
-        # about every 0.4 seconds
-        led.showascii(eyes[-1])
-        time.sleep(0.4)
-else:
-    blinktime = 0.05
+# Main control loop; placed in a function call so we can use it with curses
+def mainui(cursesscr = False):
+    led = dcled.core.LED(cursesscr)
     
-    # Open your eyes
-    for frame in eyes[::-1]:
-        led.showascii(frame)
-        time.sleep(blinktime)
-
-    # Wake up by blinking a few times
-    for i in range(0, random.randint(2,5)):
-        blink(led, eyes, blinktime)
-
-    # Awake
-    while (1):
-
-        # Eyes open for random duration
-        for i in range (0, random.randint(0,16)):
+    if (args.shut):
+        blinktime = 0.1
+    
+        # Blink a few times before closing your eyes
+        for i in range(0, random.randint(2,4)):
+            blink(led, eyes, blinktime)
+    
+        # Close your eyes (skip the first frame because we showed it during the blink
+        for frame in eyes[1:]:
+            led.showascii(frame)
+            time.sleep(blinktime)
+    
+        # Awake
+        while (1):
+    
             # Even though the image isn't changing, we need to refresh the LED
             # about every 0.4 seconds
-            led.showascii(eyes[0])
+            led.showascii(eyes[-1])
             time.sleep(0.4)
+    else:
+        blinktime = 0.05
+        
+        # Open your eyes
+        for frame in eyes[::-1]:
+            led.showascii(frame)
+            time.sleep(blinktime)
+    
+        # Wake up by blinking a few times
+        for i in range(0, random.randint(2,5)):
+            blink(led, eyes, blinktime)
+    
+        # Awake
+        while (1):
+    
+            # Eyes open for random duration
+            for i in range (0, random.randint(0,16)):
+                # Even though the image isn't changing, we need to refresh the LED
+                # about every 0.4 seconds
+                led.showascii(eyes[0])
+                time.sleep(0.4)
+    
+            # Blink animation
+            blink(led, eyes, blinktime)
+    
 
-        # Blink animation
-        blink(led, eyes, blinktime)
-
+# If they want it interactive, use curses.wrapper to reset the shell when the program exits
+if args.interactive:
+    curses.wrapper(mainui)
+else:
+    mainui()
