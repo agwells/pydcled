@@ -4,7 +4,7 @@
 # closed eyes when your screensaver comes on.
 
 eyes=${1:-kitty}
-pathtoeyes=/home/aaronw/programs/pydcled
+pathtoeyes="/home/aaronw/programs/pydcled/eyes.py -e $eyes -i"
 # For Mint MATE
 screensaverintf="interface=org.mate.ScreenSaver,member=ActiveChanged"
 # For Gnome
@@ -13,12 +13,13 @@ screensaverintf="interface=org.mate.ScreenSaver,member=ActiveChanged"
 dbus-monitor --session $screensaverintf --monitor | (
 
     echo "Waking up!"
-    python $pathtoeyes/eyes.py -e $eyes &
+    python $pathtoeyes &
     LEDPID=$!
 
     function clean_up {
         kill $LEDPID
         echo "LED is now powered off."
+        reset
         exit
     }
 
@@ -29,12 +30,12 @@ dbus-monitor --session $screensaverintf --monitor | (
         if echo $X | grep "boolean true" &> /dev/null; then
             echo "Going to sleep!"
             kill $LEDPID &> /dev/null 2>&1
-            python $pathtoeyes/eyes.py -e $eyes --shut &
+            python $pathtoeyes --shut &
             LEDPID=$!
         elif echo $X | grep "boolean false" &> /dev/null; then
             echo "Waking up!"
             kill $LEDPID &> /dev/null 2>&1
-            python $pathtoeyes/eyes.py -e $eyes &
+            python $pathtoeyes &
             LEDPID=$!
         fi
     done
