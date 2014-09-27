@@ -73,9 +73,9 @@ class LED_untimed(object):
         # strip out all newlines, in case they were using those to format the string
         screen = screen.replace("\n", '').lower()
 #        print screen
-        widthmult = 3
+        widthmult = 4
         offpixel = ' ' * widthmult
-        onpixel = ' @ '
+        onpixel = '@' + (' ' * (widthmult - 1))
         currentimage = screen[:(self.ledheight * self.ledwidth)].ljust((self.ledheight * self.ledwidth), ' ')
         currentimage = re.sub('[^'+litchar+']', offpixel, currentimage)
         currentimage = currentimage.replace(litchar, onpixel)
