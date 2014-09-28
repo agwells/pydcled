@@ -320,9 +320,19 @@ def mainui(cursesscr = False):
                     led.showascii(eyes[0])
                     # Eyes open for random duration
                     if (cursesscr):
-                        cursesscr.timeout(random.randint(0,6)*1000)
-                        key = cursesscr.getch()
-                        if key == ord(' '):
+
+                        key = -1
+                        
+                        # time in seconds
+                        timeremaining = timeout = random.randint(0,6)
+                        timestart = time.time()
+                        while timeremaining > 0 and key != ord(' '):
+                            # timeout takes milliseconds
+                            cursesscr.timeout(int(timeremaining * 1000))
+                            key = cursesscr.getch()
+                            timeremaining = timeout - (time.time() - timestart)
+
+                        if (key == ord(' ')):
                             break
                     else:
                         time.sleep(random.randint(0,6))
