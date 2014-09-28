@@ -155,6 +155,7 @@ class LED(threading.Thread):
         # Initialize screen to empty
         while True:
             self.updateled.wait(self.refreshrate)
+            self.updateled.clear()
             self.rawled.showascii(self.screencontents)
     
     def __init__(self, cursesscr = False):
