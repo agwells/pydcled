@@ -57,6 +57,7 @@ class LED_untimed(object):
             self.usecurses = True
             self.stdscr = cursesscreen
             curses.use_default_colors()
+            curses.curs_set(0)
             # Code for changing the color
 #             if (curses.can_change_color()):
 #                 curses.init_color(0, 0, 0, 0)

@@ -271,47 +271,63 @@ eyes = eyesets[args.eyes]
 
 # Main control loop; placed in a function call so we can use it with curses
 def mainui(cursesscr = False):
+    eyeswideshut = args.shut
     try:
         led = dcled.core.LED(cursesscr)
-        
-        if (args.shut):
-            blinktime = 0.1
-        
-            # Blink a few times before closing your eyes
-            for i in range(0, random.randint(2,4)):
-                blink(led, eyes, blinktime)
-        
-            # Close your eyes (skip the first frame because we showed it during the blink
-            for frame in eyes[1:]:
-                led.showascii(frame)
-                time.sleep(blinktime)
-        
-            # Asleep
-            led.showascii(eyes[-1])
-            while (True):
-                time.sleep(1000)
-    
-        else:
-            blinktime = 0.05
+        while (True):
             
-            # Open your eyes
-            for frame in eyes[::-1]:
-                led.showascii(frame)
-                time.sleep(blinktime)
+            if (eyeswideshut):
+                blinktime = 0.1
+            
+                # Blink a few times before closing your eyes
+                for i in range(0, random.randint(2,4)):
+                    blink(led, eyes, blinktime)
+            
+                # Close your eyes (skip the first frame because we showed it during the blink
+                for frame in eyes[1:]:
+                    led.showascii(frame)
+                    time.sleep(blinktime)
+            
+                # Asleep
+                led.showascii(eyes[-1])
+                if (cursesscr):
+                    cursesscr.timeout(-1)
+                    while (cursesscr.getch() != ord(' ')):
+                        pass
+                else:
+                    while (True):
+                        time.sleep(1000)
+                eyeswideshut = False
         
-            # Wake up by blinking a few times
-            for i in range(0, random.randint(2,5)):
-                blink(led, eyes, blinktime)
-        
-            # Awake
-            while (1):
-        
-                # Eyes open for random duration
-                led.showascii(eyes[0])
-                time.sleep(random.randint(0,6))
-        
-                # Blink animation
-                blink(led, eyes, blinktime)
+            else:
+                blinktime = 0.05
+                
+                # Open your eyes
+                for frame in eyes[::-1]:
+                    led.showascii(frame)
+                    time.sleep(blinktime)
+            
+                # Wake up by blinking a few times
+                for i in range(0, random.randint(1,3)):
+                    blink(led, eyes, blinktime)
+            
+                # Awake
+                while True:
+            
+                    # Blink animation
+                    blink(led, eyes, blinktime)
+
+                    led.showascii(eyes[0])
+                    # Eyes open for random duration
+                    if (cursesscr):
+                        cursesscr.timeout(random.randint(0,6)*1000)
+                        key = cursesscr.getch()
+                        if key == ord(' '):
+                            break
+                    else:
+                        time.sleep(random.randint(0,6))
+                eyeswideshut = True
+            
     except (KeyboardInterrupt, SystemExit):
         quit()
         
