@@ -4,7 +4,7 @@
 # closed eyes when your screensaver comes on.
 
 eyes=${1:-kitty}
-pathtoeyes="/home/aaronw/programs/pydcled/multiprocess.py -e $eyes -i"
+pathtoeyes="/home/aaronw/programs/pydcled/eyes.py -e $eyes -i"
 # For Mint MATE
 screensaverintf="interface=org.mate.ScreenSaver,member=ActiveChanged"
 # For Gnome

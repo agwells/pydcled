@@ -1,8 +1,7 @@
 import usb.core
 import curses
 import re
-import multiprocessing
-import atexit
+import threading
 
 class LED_untimed(object):
     
@@ -69,9 +68,9 @@ class LED_untimed(object):
 
     # Takes an ascii representation of the screen, and converts it into a set of bytes
     # suitable to send via USB
-    def packascii(self, screen, litchar='x'):
+    def packascii(self, pscreen, litchar='x'):
         # strip out all newlines, in case they were using those to format the string
-        screen = screen.replace("\n", '').lower()
+        screen = pscreen.replace("\n", '').lower()
 #        print screen
         widthmult = 4
         offpixel = ' ' * widthmult
@@ -142,32 +141,27 @@ class LED_untimed(object):
         self.sendtoled(self.packascii(screen, litchar))
 
 
-class LED(object):
+class LED(threading.Thread):
     # How long to wait (in seconds) between refreshing the USB
     refreshrate = 0.4
     
-    def close(self):
-        self.process.terminate()
+    def showascii(self, screencontents):
+        self.screencontents = screencontents
+        self.updateled.set()
     
-    def showascii(self, screen):
-        self.pipesend.send(screen)
-    
-    def _run(self, piperecv, cursesscr):
-        try:
-            led = LED_untimed(cursesscr)
-            # Initialize screen to empty
-            showonscr = '.' * (LED_untimed.ledheight * LED_untimed.ledwidth)
-            while True:
-                led.showascii(showonscr)
-                ready = piperecv.poll(self.refreshrate)
-                if (ready):
-                    showonscr = piperecv.recv()
-        except (KeyboardInterrupt, SystemExit):
-            quit()
+    def run(self):
+        print 'run'
+        # Initialize screen to empty
+        while True:
+            self.updateled.wait(self.refreshrate)
+            self.rawled.showascii(self.screencontents)
     
     def __init__(self, cursesscr = False):
-        self.pipesend, piperecv = multiprocessing.Pipe()
-        self.process = multiprocessing.Process(target=LED._run, args=(self, piperecv, cursesscr))
-        self.process.daemon = True
-        self.process.start()
-        atexit.register(self.close)
+        threading.Thread.__init__(self)
+        self.updateled = threading.Event()
+        self.cursesscr = cursesscr
+        self.rawled = LED_untimed(self.cursesscr)
+        self.showonscr = '.' * (LED_untimed.ledheight * LED_untimed.ledwidth)
+        self.daemon = True
+        self.start()
+
