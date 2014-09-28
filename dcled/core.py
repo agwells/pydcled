@@ -72,7 +72,6 @@ class LED_untimed(object):
     def packascii(self, pscreen, litchar='x'):
         # strip out all newlines, in case they were using those to format the string
         screen = pscreen.replace("\n", '').lower()
-#        print screen
         widthmult = 4
         offpixel = ' ' * widthmult
         onpixel = '@' + (' ' * (widthmult - 1))
@@ -120,7 +119,6 @@ class LED_untimed(object):
                     packet.append(rows[i+j][k])
             packets.append(packet)
         return packets
-    #        print "\n"
 
     # Data should be an array of packets ready to send to the device
     def sendtoled(self, data):
@@ -151,7 +149,6 @@ class LED(threading.Thread):
         self.updateled.set()
     
     def run(self):
-        print 'run'
         # Initialize screen to empty
         while True:
             self.updateled.wait(self.refreshrate)
