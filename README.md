@@ -1,7 +1,7 @@
 pydcled
 =======
 
-A python program/library for controlling the [Dream Cheeky USB LED message board 818](http://dreamcheeky.com/led-message-board)
+A python program/library for controlling the [Dream Cheeky 818 LED message board](http://dreamcheeky.com/led-message-board)
 
 Code inspired by:
 
