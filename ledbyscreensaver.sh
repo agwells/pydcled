@@ -4,13 +4,13 @@
 # closed eyes when your screensaver comes on.
 
 eyes=${1:-kitty}
-pathtoeyes="/home/aaronw/programs/pydcled/eyes.py -i -e $eyes"
+pathtoeyes="/home/aaronw/programs/pydcled/eyes.py -e $eyes"
 # For Mint MATE
 screensaverintf="interface=org.mate.ScreenSaver,member=ActiveChanged"
 # For Gnome
 #screensaverintf="interface=org.gnome.ScreenSaver,member=ActiveChanged"
 
-dbus-monitor --session $screensaverintf --monitor | (
+dbus-monitor --session "$screensaverintf" --monitor | (
 
     echo "Waking up!"
     python $pathtoeyes &
