@@ -1,7 +1,10 @@
-#/bin/sh
+#/bin/bash
 
 # This script will make the LED show open eyes when your computer is active, and
 # closed eyes when your screensaver comes on.
+
+# To make it launch on startup, put this command in your startup applications list:
+# bash -c "/PATH/TO/YOUR/ledbyscreensaver.sh"
 
 eyes=${1:-kitty}
 pathtoeyes="/home/aaronw/programs/pydcled/eyes.py -e $eyes"
